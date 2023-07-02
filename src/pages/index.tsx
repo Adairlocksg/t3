@@ -1,83 +1,99 @@
 import Head from "next/head";
-import Link from "next/link";
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
 import {
   SignUp,
   useUser,
-  SignOutButton,
-  useSession,
-  auth,
+
 } from "@clerk/nextjs";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Image from "next/image";
+import { LoadingPage } from "~/components/loading";
 
 dayjs.extend(relativeTime);
 
-export default function Home() {
-  const user = useUser();
-  const { data, isLoading } = api.post.getAll.useQuery();
+const CreatePostWizard = () => {
+  const { user } = useUser();
 
-  const CreatePostWizard = () => {
-    const { user } = useUser();
+  if (!user) return null;
 
-    if (!user) return null;
+  console.log(user);
 
-    console.log(user);
+  return (
+    <div className="flex w-full gap-4">
+      <Image
+        src={user.profileImageUrl}
+        alt="profile image"
+        className="h-14 w-14 rounded-full"
+        width={56}
+        height={56}
+      />
+      <input
+        placeholder="Type some emojis"
+        className="grow bg-transparent outline-none"
+      />
+    </div>
+  );
+};
 
-    return (
-      <div className="flex w-full gap-4">
-        <Image
-          src={user.profileImageUrl}
-          alt="profile image"
-          className="h-14 w-14 rounded-full"
-          width={56}
-          height={56}
-        />
-        <input
-          placeholder="Type some emojis"
-          className="grow bg-transparent outline-none"
-        />
-      </div>
-    );
-  };
+type PostWithUserProps = RouterOutputs["post"]["getAll"][number];
 
-  type PostWithUserProps = RouterOutputs["post"]["getAll"][number];
-
-  const PostView = (props: PostWithUserProps) => {
-    const { post, author } = props;
-    return (
-      <div className="flex gap-3 border-b border-slate-400 p-4">
-        <Image
-          src={author.profileImageUrl}
-          className="h-12 w-12 rounded-full"
-          alt={`@${author.username}'s profile image`}
-          width={48}
-          height={48}
-        />
-        <div className="flex flex-col">
-          <div className="flex gap-1 text-slate-300">
-            <span className="font-bold">{`@${author.username}`}</span>
-            <span className="font-thin">{` · ${dayjs(
-              post.createdAt
-            ).fromNow()}`}</span>
-          </div>
-          <span>{post.content}</span>
+const PostView = (props: PostWithUserProps) => {
+  const { post, author } = props;
+  return (
+    <div className="flex gap-3 border-b border-slate-400 p-4">
+      <Image
+        src={author.profileImageUrl}
+        className="h-12 w-12 rounded-full"
+        alt={`@${author.username}'s profile image`}
+        width={48}
+        height={48}
+      />
+      <div className="flex flex-col">
+        <div className="flex gap-1 text-slate-300">
+          <span className="font-bold">{`@${author.username}`}</span>
+          <span className="font-thin">{` · ${dayjs(
+            post.createdAt
+          ).fromNow()}`}</span>
         </div>
+        <span>{post.content}</span>
       </div>
-    );
-  };
+    </div>
+  );
+};
 
-  if (!user.isSignedIn)
+const Feed = () => {
+  const { data, isLoading: postsLoading } = api.post.getAll.useQuery();
+
+  if (postsLoading) return <LoadingPage />;
+
+  if (!data) return <div>No posts</div>;
+
+  return (
+    <section className="flex flex-col">
+      {data?.map((fullPost) => (
+        <PostView {...fullPost} key={fullPost.post.id} />
+      ))}
+    </section>
+  );
+};
+
+export default function Home() {
+  const { isLoaded: userLoaded, isSignedIn } = useUser();
+
+  api.post.getAll.useQuery();
+
+  if (!isSignedIn)
     return (
       <main className="grid h-screen place-items-center">
         <SignUp />
       </main>
     );
 
-  if (!data || isLoading) return <div>Loading...</div>;
+  if (!userLoaded) return <div />;
+
   return (
     <>
       <Head>
@@ -90,11 +106,7 @@ export default function Home() {
           <div className="border-b border-slate-400 p-4">
             <CreatePostWizard />
           </div>
-          <section className="flex flex-col">
-            {data?.map((fullPost) => (
-              <PostView {...fullPost} key={fullPost.post.id} />
-            ))}
-          </section>
+          <Feed />
         </div>
       </main>
     </>
