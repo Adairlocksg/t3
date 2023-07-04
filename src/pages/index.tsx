@@ -30,7 +30,7 @@ const CreatePostWizard = () => {
       }
     },
   });
-  
+
   const [input, setInput] = useState<string>("");
 
   if (!user) return null;
@@ -50,7 +50,6 @@ const CreatePostWizard = () => {
         type="text"
         value={input}
         onKeyDown={(e) => {
-          e.preventDefault();
           if (e.key !== "Enter") return;
           if (input === "") return;
 
