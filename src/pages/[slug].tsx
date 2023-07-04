@@ -4,13 +4,30 @@ import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { PageLayout } from "~/components/layout";
 import { LoadingPage, LoadingSpinner } from "~/components/loading";
+import PostView from "~/components/postivew";
 import { api } from "~/utils/api";
+
+const ProfileFeed = (props: { userId: string }) => {
+  const { data, isLoading } = api.post.getPostsByUserId.useQuery({
+    userId: props.userId,
+  });
+
+  if (isLoading) return <LoadingPage />;
+
+  if (!data || !data.length) return <div>User has not posted!</div>;
+
+  return (
+    <div className="flex flex-col">
+      {data.map((fullPost) => (
+        <PostView {...fullPost} key={fullPost.post.id} />
+      ))}
+    </div>
+  );
+};
 
 const ProfilePage: NextPage = () => {
   const searchParams = useSearchParams();
   const userName = searchParams.get("slug") || "";
-
-  // if (userName === "") return <div>404 Not found</div>;
 
   const { data, isLoading } = api.profile.getUserByUserName.useQuery({
     userName: userName?.replace("@", ""),
@@ -36,8 +53,11 @@ const ProfilePage: NextPage = () => {
           />
         </div>
         <div className="h-[64px]"></div>
-        <div className="p-4 text-2xl font-bold">{`@${data.username ?? ""}`}</div>
-        <div className="border-b border-slate-400 w-full"></div>
+        <div className="p-4 text-2xl font-bold">{`@${
+          data.username ?? ""
+        }`}</div>
+        <div className="w-full border-b border-slate-400"></div>
+        <ProfileFeed userId={data.id} />
       </PageLayout>
     </>
   );
