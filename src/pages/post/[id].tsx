@@ -1,19 +1,33 @@
 import type { NextPage } from "next";
 import Head from "next/head";
+import { useSearchParams } from "next/navigation";
+import { PageLayout } from "~/components/layout";
+import { LoadingPage } from "~/components/loading";
+import PostView from "~/components/postivew";
+import { api } from "~/utils/api";
 
-const SiglePostPage: NextPage = () => {
+const SinglePostPage: NextPage = () => {
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id") || "";
+
+  const { data, isLoading } = api.post.getPostById.useQuery({
+    id: id,
+  });
+
+  if (isLoading) return <LoadingPage />;
+
+  if (!data) return <div>404 Not found</div>;
+
   return (
     <>
       <Head>
-        <title>Posts</title>
+        <title>{`${data.post.content} - ${data.author.username}`}</title>
       </Head>
-      <main className="flex h-screen justify-center">
-        <div className="w-full border-x border-slate-400 md:max-w-2xl">
-          <div className="border-b border-slate-400 p-4">Slug</div>
-        </div>
-      </main>
+      <PageLayout>
+        <PostView {...data} />
+      </PageLayout>
     </>
   );
 };
 
-export default SiglePostPage;
+export default SinglePostPage;
