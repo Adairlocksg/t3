@@ -11,16 +11,5 @@ export const profileRouter = createTRPCRouter({
       const user = await clerkClient.users.getUser(input.id);
 
       return filterUserFromClient(user);
-      /* const [user] = await clerkClient.users.get({
-        id: input.id,
-      });
-
-      if (!user)
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: `Não foi encontrado o usuário ${input.userName}`,
-        });
-
-      return filterUserFromClient(user); */
     }),
 });
