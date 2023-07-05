@@ -4,6 +4,7 @@ const filterUserFromClient = (user: User) => {
   return {
     id: user.id,
     username: user.username,
+    email: user.emailAddresses,
     profileImageUrl: user.profileImageUrl,
   };
 };

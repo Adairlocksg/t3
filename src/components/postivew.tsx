@@ -15,14 +15,14 @@ const PostView = (props: PostWithUserProps) => {
       <Image
         src={author.profileImageUrl}
         className="h-12 w-12 rounded-full"
-        alt={`@${author.username}'s profile image`}
+        alt={`@${author.username || ""}'s profile image`}
         width={48}
         height={48}
       />
       <div className="flex flex-col">
         <div className="flex gap-1 text-slate-300">
-          <Link href={`/@${author.username}`}>
-            <span className="font-bold">{`@${author.username}`}</span>
+          <Link href={`/${post.authorId || ""}`}>
+            <span className="font-bold">{`@${author.username || ""}`}</span>
           </Link>
           <Link href={`/post/${post.id}`}>
             <span className="font-thin">{` · ${dayjs(

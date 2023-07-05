@@ -3,7 +3,7 @@ import Head from "next/head";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { PageLayout } from "~/components/layout";
-import { LoadingPage, LoadingSpinner } from "~/components/loading";
+import { LoadingPage } from "~/components/loading";
 import PostView from "~/components/postivew";
 import { api } from "~/utils/api";
 
@@ -27,10 +27,10 @@ const ProfileFeed = (props: { userId: string }) => {
 
 const ProfilePage: NextPage = () => {
   const searchParams = useSearchParams();
-  const userName = searchParams.get("slug") || "";
+  const userId = searchParams.get("slug") || "";
 
-  const { data, isLoading } = api.profile.getUserByUserName.useQuery({
-    userName: userName?.replace("@", ""),
+  const { data, isLoading } = api.profile.getUserById.useQuery({
+    id: userId,
   });
 
   if (isLoading) return <LoadingPage />;

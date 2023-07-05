@@ -5,11 +5,14 @@ import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import filterUserFromClient from "~/server/helpers/filterUserForClient";
 
 export const profileRouter = createTRPCRouter({
-  getUserByUserName: publicProcedure
-    .input(z.object({ userName: z.string() }))
+  getUserById: publicProcedure
+    .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
-      const [user] = await clerkClient.users.getUserList({
-        username: [input.userName],
+      const user = await clerkClient.users.getUser(input.id);
+
+      return filterUserFromClient(user);
+      /* const [user] = await clerkClient.users.get({
+        id: input.id,
       });
 
       if (!user)
@@ -18,6 +21,6 @@ export const profileRouter = createTRPCRouter({
           message: `Não foi encontrado o usuário ${input.userName}`,
         });
 
-      return filterUserFromClient(user);
+      return filterUserFromClient(user); */
     }),
 });
